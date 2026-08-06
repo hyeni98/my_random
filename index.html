@@ -2,107 +2,404 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
 
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#fff3f7">
 
-  <title>지하철 랜덤 뽑기</title>
+  <title>지하철 랜덤 여행</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body {
-      font-family: -apple-system, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      padding:
+        max(30px, env(safe-area-inset-top))
+        20px
+        max(30px, env(safe-area-inset-bottom));
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Apple SD Gothic Neo",
+        "Pretendard",
+        sans-serif;
+
+      color: #4d4051;
+
+      background:
+        radial-gradient(circle at 15% 20%, #ffe0eb 0 70px, transparent 71px),
+        radial-gradient(circle at 90% 15%, #e2dcff 0 85px, transparent 86px),
+        radial-gradient(circle at 90% 90%, #d7f5ed 0 100px, transparent 101px),
+        linear-gradient(145deg, #fff7fa, #f8f5ff);
+    }
+
+    .app {
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+    }
+
+    .decoration {
+      position: absolute;
+      font-size: 32px;
+      animation: float 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .decoration.one {
+      top: -45px;
+      left: 5px;
+    }
+
+    .decoration.two {
+      top: -35px;
+      right: 10px;
+      animation-delay: 0.8s;
+    }
+
+    .card {
+      padding: 32px 24px 26px;
       text-align: center;
-      padding: 40px 20px;
-      background-color: #f4f4f4;
+
+      background: rgba(255, 255, 255, 0.88);
+      border: 3px solid rgba(255, 255, 255, 0.95);
+      border-radius: 32px;
+
+      box-shadow:
+        0 20px 50px rgba(135, 101, 145, 0.15),
+        inset 0 0 20px rgba(255, 255, 255, 0.8);
+
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
-    .container {
-      max-width: 400px;
-      margin: auto;
-      padding: 30px;
-      background-color: white;
-      border-radius: 20px;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    .title-emoji {
+      display: inline-block;
+      font-size: 58px;
+      animation: trainMove 2.2s ease-in-out infinite;
     }
 
-    select,
+    h1 {
+      margin: 8px 0 6px;
+      font-size: 29px;
+      letter-spacing: -1.5px;
+    }
+
+    .description {
+      margin: 0 0 24px;
+      color: #918596;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .result-card {
+      min-height: 210px;
+      padding: 24px 18px;
+      margin-bottom: 20px;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      background: linear-gradient(145deg, #fff2f7, #f3efff);
+      border: 2px dashed #e6bfd1;
+      border-radius: 25px;
+
+      transition:
+        transform 0.25s ease,
+        background 0.3s ease;
+    }
+
+    .result-card.pop {
+      animation: pop 0.45s ease;
+    }
+
+    .line-badge {
+      min-width: 92px;
+      padding: 10px 18px;
+      margin-bottom: 15px;
+
+      color: white;
+      font-size: 21px;
+      font-weight: 800;
+
+      background-color: #ff8fb1;
+      border-radius: 999px;
+
+      box-shadow: 0 7px 15px rgba(0, 0, 0, 0.12);
+    }
+
+    .station-number {
+      margin-bottom: 8px;
+
+      color: #5b4e60;
+      font-size: 48px;
+      font-weight: 900;
+      letter-spacing: -2px;
+    }
+
+    .station-info {
+      color: #948897;
+      font-size: 15px;
+    }
+
+    .waiting {
+      color: #aa9dad;
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
     button {
       width: 100%;
-      padding: 15px;
-      margin-top: 15px;
-      font-size: 18px;
-      border-radius: 10px;
-    }
-
-    button {
+      min-height: 58px;
       border: none;
-      background-color: #007aff;
+      border-radius: 18px;
+
       color: white;
-      font-weight: bold;
+      font-family: inherit;
+      font-size: 19px;
+      font-weight: 800;
+
+      background: linear-gradient(135deg, #ff8fb1, #a990f5);
+      box-shadow: 0 10px 22px rgba(194, 132, 189, 0.32);
+
+      cursor: pointer;
+      transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        opacity 0.15s ease;
     }
 
     button:active {
-      transform: scale(0.97);
+      transform: scale(0.96);
+      box-shadow: 0 5px 12px rgba(194, 132, 189, 0.25);
     }
 
-    #result {
-      margin-top: 30px;
-      font-size: 25px;
-      font-weight: bold;
+    button:disabled {
+      opacity: 0.7;
+      cursor: default;
+    }
+
+    .guide {
+      margin: 17px 0 0;
+      color: #b0a5b3;
+      font-size: 13px;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0) rotate(-5deg);
+      }
+
+      50% {
+        transform: translateY(-9px) rotate(5deg);
+      }
+    }
+
+    @keyframes trainMove {
+      0%, 100% {
+        transform: translateX(-4px) rotate(-2deg);
+      }
+
+      50% {
+        transform: translateX(5px) rotate(2deg);
+      }
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(0.92);
+      }
+
+      60% {
+        transform: scale(1.04);
+      }
+
+      100% {
+        transform: scale(1);
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <h1>🚇 지하철 랜덤 뽑기</h1>
+  <main class="app">
+    <div class="decoration one">☁️</div>
+    <div class="decoration two">✨</div>
 
-    <p>호선을 선택하세요.</p>
+    <section class="card">
+      <div class="title-emoji">🚇</div>
 
-    <select id="line">
-      <option value="1">1호선</option>
-      <option value="2">2호선</option>
-      <option value="3">3호선</option>
-      <option value="4">4호선</option>
-      <option value="5">5호선</option>
-      <option value="6">6호선</option>
-      <option value="7">7호선</option>
-      <option value="8">8호선</option>
-      <option value="9">9호선</option>
-    </select>
+      <h1>지하철 랜덤 여행</h1>
 
-    <button onclick="drawNumber()">랜덤 숫자 뽑기</button>
+      <p class="description">
+        오늘은 어디로 떠나볼까?<br>
+        호선과 역 번호를 랜덤으로 뽑아드려요!
+      </p>
 
-    <div id="result">결과가 여기에 나옵니다.</div>
-  </div>
+      <div id="resultCard" class="result-card">
+        <div id="waiting" class="waiting">
+          아래 버튼을 눌러주세요<br>
+          💗 두근두근 💗
+        </div>
+
+        <div id="result" hidden>
+          <div id="lineBadge" class="line-badge">?</div>
+          <div id="stationNumber" class="station-number">?번째 역</div>
+          <div id="stationInfo" class="station-info"></div>
+        </div>
+      </div>
+
+      <button id="drawButton" type="button">
+        🎲 랜덤으로 뽑기
+      </button>
+
+      <p class="guide">
+        누를 때마다 새로운 호선과 역 번호가 나와요.
+      </p>
+    </section>
+  </main>
 
   <script>
-    // 과제에서 정한 역 개수에 맞게 수정
-    const stationCounts = {
-      1: 10,
-      2: 51,
-      3: 44,
-      4: 51,
-      5: 56,
-      6: 39,
-      7: 53,
-      8: 18,
-      9: 38
+    /*
+      과제에서 정한 기준과 역 개수가 다르다면
+      아래 숫자만 수정하면 됩니다.
+    */
+    const subwayLines = {
+      1: {
+        count: 10,
+        color: "#0052A4"
+      },
+      2: {
+        count: 51,
+        color: "#00A84D"
+      },
+      3: {
+        count: 44,
+        color: "#EF7C1C"
+      },
+      4: {
+        count: 51,
+        color: "#00A5DE"
+      },
+      5: {
+        count: 56,
+        color: "#996CAC"
+      },
+      6: {
+        count: 39,
+        color: "#CD7C2F"
+      },
+      7: {
+        count: 53,
+        color: "#747F00"
+      },
+      8: {
+        count: 18,
+        color: "#E6186C"
+      },
+      9: {
+        count: 38,
+        color: "#BDB092"
+      }
     };
 
-    function drawNumber() {
-      const line = document.getElementById("line").value;
-      const count = stationCounts[line];
+    const drawButton = document.getElementById("drawButton");
+    const resultCard = document.getElementById("resultCard");
+    const waiting = document.getElementById("waiting");
+    const result = document.getElementById("result");
 
-      // 1부터 해당 호선의 역 개수까지
-      const randomNumber =
-        Math.floor(Math.random() * count) + 1;
+    const lineBadge = document.getElementById("lineBadge");
+    const stationNumber = document.getElementById("stationNumber");
+    const stationInfo = document.getElementById("stationInfo");
 
-      document.getElementById("result").innerHTML =
-        `${line}호선은 총 ${count}개 역<br>` +
-        `🎉 뽑힌 숫자: ${randomNumber}번`;
+    function getRandomNumber(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
     }
+
+    function showRandomResult() {
+      drawButton.disabled = true;
+      drawButton.textContent = "🚇 열심히 고르는 중...";
+
+      waiting.hidden = true;
+      result.hidden = false;
+
+      let animationCount = 0;
+
+      const rollingAnimation = setInterval(() => {
+        const temporaryLine = getRandomNumber(1, 9);
+        const temporaryData = subwayLines[temporaryLine];
+
+        const temporaryStation = getRandomNumber(
+          1,
+          temporaryData.count
+        );
+
+        lineBadge.textContent = `${temporaryLine}호선`;
+        lineBadge.style.backgroundColor = temporaryData.color;
+
+        stationNumber.textContent = `${temporaryStation}번째 역`;
+        stationInfo.textContent =
+          `총 ${temporaryData.count}개 역 중에서 고르는 중...`;
+
+        animationCount++;
+
+        if (animationCount >= 12) {
+          clearInterval(rollingAnimation);
+          displayFinalResult();
+        }
+      }, 80);
+    }
+
+    function displayFinalResult() {
+      // 1호선부터 9호선까지 랜덤 선택
+      const selectedLine = getRandomNumber(1, 9);
+
+      // 선택된 호선 정보
+      const selectedLineData = subwayLines[selectedLine];
+
+      // 선택된 호선의 역 개수 범위에서 랜덤 선택
+      const selectedStation = getRandomNumber(
+        1,
+        selectedLineData.count
+      );
+
+      lineBadge.textContent = `${selectedLine}호선`;
+      lineBadge.style.backgroundColor = selectedLineData.color;
+
+      stationNumber.textContent = `${selectedStation}번째 역`;
+
+      stationInfo.textContent =
+        `총 ${selectedLineData.count}개 역 중 ${selectedStation}번째예요 🎉`;
+
+      resultCard.classList.remove("pop");
+
+      // 애니메이션을 다시 실행하기 위한 처리
+      void resultCard.offsetWidth;
+
+      resultCard.classList.add("pop");
+
+      drawButton.disabled = false;
+      drawButton.textContent = "🎲 한 번 더 뽑기";
+    }
+
+    drawButton.addEventListener("click", showRandomResult);
   </script>
 </body>
 </html>
